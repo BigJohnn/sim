@@ -1,3 +1,39 @@
+Preliminaries
+```
+Ensure nvidia-smi is work on your host machine.
+```
+You also need to make some changes in your Dockerfile && docker-compose.yml.
+```
+PREBUILD a docker image that have external dependencies
+
+# 1stly, to build zeroth-bot-sim:v0
+# FROM nvidia/cuda:12.1.0-cudnn8-devel-ubuntu20.04   
+
+# COPY sources.list /etc/apt/sources.list
+
+# RUN mkdir /root/.pip
+# COPY pip.conf /root/.pip/pip.conf
+
+# RUN apt install -y wget zlib1g-dev libssl-dev libncurses5-dev libsqlite3-dev libreadline-dev libtk8.6 libgdm-dev libdb4o-cil-dev libpcap-dev
+# RUN wget https://mirrors.huaweicloud.com/python/3.8.19/Python-3.8.19.tar.xz && tar -xvf Python-3.8.19.tar.xz
+
+# WORKDIR  /root/Python-3.8.19
+# RUN ./configure --prefix=/usr/local && make && make install
+
+# WORKDIR /usr/local/bin/
+# RUN ln -s pip3 pip
+
+# WORKDIR  /app/sim/
+# RUN make install-dev
+
+# RUN wget https://developer.nvidia.com/isaac-gym-preview-4
+# # RUN tar -xvf 
+# RUN make install-third-party-external
+
+```
+
+Then, 
+
 Terminal1:
 ```
 docker-compose up --build
