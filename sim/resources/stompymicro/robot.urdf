@@ -122,7 +122,7 @@
     </inertial>
   </link>
   <joint name="right_hip_pitch" type="revolute">
-    <origin xyz="-0.045750183202404315 -0.00032689585567163837 -0.10384882247403085" rpy="-1.570796353589792 -4.6410206566704915e-08 1.5707963000000003"/>
+    <origin xyz="-0.045750183202404315 -0.00032689585567163837 -0.09684882247403085" rpy="-1.570796353589792 -4.6410206566704915e-08 1.5707963000000003"/>
     <parent link="Torso"/>
     <child link="hip_yaw_right"/>
     <limit effort="80" velocity="5" lower="-1.5707963" upper="1.5707963"/>
@@ -151,7 +151,7 @@
     </inertial>
   </link>
   <joint name="left_hip_pitch" type="revolute">
-    <origin xyz="0.045549819648300315 -0.0003268960191209584 -0.10384882247403085" rpy="1.5707963535897942 -4.6410206566704915e-08 1.5707963000000003"/>
+    <origin xyz="0.045549819648300315 -0.0003268960191209584 -0.09684882247403085" rpy="1.5707963535897942 -4.6410206566704915e-08 1.5707963000000003"/>
     <parent link="Torso"/>
     <child link="hip_yaw_left"/>
     <limit effort="80" velocity="5" lower="-1.5707963" upper="1.5707963"/>
@@ -209,10 +209,10 @@
     </inertial>
   </link>
   <joint name="right_hip_yaw" type="revolute">
-    <origin xyz="-0.02550000162875169 0.012500001141551514 0.019359999918275368" rpy="9.282041333256968e-08 1.5707963000000005 0.0"/>
+    <origin xyz="-0.02550000162875169 0 0.019359999918275368" rpy="9.282041333256968e-08 1.5707963000000005 0.0"/>
     <parent link="hip_yaw_right"/>
     <child link="hip_roll_right"/>
-    <limit effort="80" velocity="5" lower="-0.087266463" upper="1.5707963"/>
+    <limit effort="80" velocity="5" lower="-0.3" upper="0.1"/>
     <axis xyz="0 0 1"/>
   </joint>
   <link name="hip_roll_right">
@@ -238,10 +238,10 @@
     </inertial>
   </link>
   <joint name="left_hip_yaw" type="revolute">
-    <origin xyz="-0.02550000297464769 -0.012500001 0.01936000008172467" rpy="-3.1415926071795863 -1.5707963 0.0"/>
+    <origin xyz="-0.02550000297464769 0 0.01936000008172467" rpy="-3.1415926071795863 -1.5707963 0.0"/>
     <parent link="hip_yaw_left"/>
     <child link="hip_roll_left"/>
-    <limit effort="80" velocity="5" lower="-1.5707963" upper="0.087266463"/>
+    <limit effort="80" velocity="5" lower="-0.1" upper="0.3"/>
     <axis xyz="0 0 1"/>
   </joint>
   <link name="hip_roll_left">
@@ -270,7 +270,7 @@
     <origin xyz="-0.030003116165437632 -0.06434189265302206 -0.00015000392836930906" rpy="3.141592518707449 -1.961380480253183e-08 2.7052603000000013"/>
     <parent link="right_shoulder_yaw_motor"/>
     <child link="right_hand"/>
-    <limit effort="80" velocity="5" lower="-1.5707963" upper="1.5707963"/>
+    <limit effort="80" velocity="5" lower="1.5707963" upper="4.71"/>
     <axis xyz="0 0 1"/>
   </joint>
   <link name="right_hand">
@@ -299,7 +299,7 @@
     <origin xyz="0.03000311710160605 -0.06434189183411612 -0.00015000134589600138" rpy="3.1415926071795863 -1.7763568394002505e-15 -2.70526039"/>
     <parent link="left_shoulder_yaw_motor"/>
     <child link="left_hand"/>
-    <limit effort="80" velocity="5" lower="-1.5707963" upper="1.5707963"/>
+    <limit effort="80" velocity="5" lower="1.5707963" upper="4.71"/>
     <axis xyz="0 0 1"/>
   </joint>
   <link name="left_hand">
@@ -325,44 +325,15 @@
     </inertial>
   </link>
   <joint name="right_hip_roll" type="revolute">
-    <origin xyz="0.0 0.06776001387753285 0.015000000939161373" rpy="-1.5707963 0.0 0.0"/>
+    <origin xyz="0.0 0.07776001212246713 0.015000000939161373" rpy="-1.5707963 0.0 0.0"/>
     <parent link="hip_roll_right"/>
-    <child link="knee_pitch_left"/>
-    <limit effort="80" velocity="5" lower="-0.78539816" upper="0.78539816"/>
-    <axis xyz="0 0 -1"/>
-  </joint>
-  <link name="knee_pitch_left">
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-        <mesh filename="meshes/knee_pitch_left.stl"/>
-      </geometry>
-      <material name="knee_pitch_left_material">
-        <color rgba="0.97254902 0.52941176 0.0039215686 1"/>
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-        <mesh filename="meshes/knee_pitch_left.stl"/>
-      </geometry>
-    </collision>
-    <inertial>
-      <mass value="0.017415556"/>
-      <inertia ixx="8.6779628e-06" iyy="1.0846052e-05" izz="4.8769685e-06" ixy="0" ixz="0" iyz="1.5102056e-06"/>
-      <origin xyz="0.0008320716 0.0066344401 -0.0053563614" rpy="0 0 0"/>
-    </inertial>
-  </link>
-  <joint name="left_hip_roll" type="revolute">
-    <origin xyz="0.0 0.06776001212246713 0.014999999060838654" rpy="-1.5707963071795865 0.0 0.0"/>
-    <parent link="hip_roll_left"/>
     <child link="knee_pitch_right"/>
     <limit effort="80" velocity="5" lower="-0.78539816" upper="0.78539816"/>
     <axis xyz="0 0 -1"/>
   </joint>
   <link name="knee_pitch_right">
     <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="0 0 -0.01" rpy="0 0 0"/>
       <geometry>
         <mesh filename="meshes/knee_pitch_right.stl"/>
       </geometry>
@@ -377,32 +348,61 @@
       </geometry>
     </collision>
     <inertial>
+      <mass value="0.017415556"/>
+      <inertia ixx="8.6779628e-06" iyy="1.0846052e-05" izz="4.8769685e-06" ixy="0" ixz="0" iyz="1.5102056e-06"/>
+      <origin xyz="0.0008320716 0.0066344401 -0.0053563614" rpy="0 0 0"/>
+    </inertial>
+  </link>
+  <joint name="left_hip_roll" type="revolute">
+    <origin xyz="0.0 0.07776001212246713 0.014999999060838654" rpy="-1.5707963071795865 0.0 0.0"/>
+    <parent link="hip_roll_left"/>
+    <child link="knee_pitch_left"/>
+    <limit effort="80" velocity="5" lower="-0.78539816" upper="0.78539816"/>
+    <axis xyz="0 0 -1"/>
+  </joint>
+  <link name="knee_pitch_left">
+    <visual>
+      <origin xyz="0 0 -0.01" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="meshes/knee_pitch_left.stl"/>
+      </geometry>
+      <material name="knee_pitch_left_material">
+        <color rgba="0.97254902 0.52941176 0.0039215686 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="meshes/knee_pitch_left.stl"/>
+      </geometry>
+    </collision>
+    <inertial>
       <mass value="0.017415406"/>
       <inertia ixx="8.6779408e-06" iyy="1.0845969e-05" izz="4.8769057e-06" ixy="0" ixz="0" iyz="1.5102123e-06"/>
       <origin xyz="-0.00083189379 0.0066344111 -0.0053564637" rpy="0 0 0"/>
     </inertial>
   </link>
-  <joint name="right_knee_pitch" type="revolute">
-    <origin xyz="0.018825 0 0.02221" rpy="1.5707963 0 -1.5707963"/>
+  <joint name="left_knee_pitch" type="revolute">
+    <origin xyz="0.020825 0 0.03271" rpy="1.5707963 0 -1.5707963"/>
     <parent link="knee_pitch_left"/>
-    <child link="right_knee_pitch_motor"/>
+    <child link="ankle_pitch_left"/>
     <limit effort="80" velocity="5" lower="-1.5707963" upper="1.5707963"/>
     <axis xyz="0 0 -1"/>
   </joint>
-  <link name="right_knee_pitch_motor">
+  <link name="ankle_pitch_left">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/right_knee_pitch_motor.stl"/>
+        <mesh filename="meshes/ankle_pitch_left.stl"/>
       </geometry>
-      <material name="right_knee_pitch_motor_material">
+      <material name="ankle_pitch_left_material">
         <color rgba="0.4 0.4 0.4 1"/>
       </material>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/right_knee_pitch_motor.stl"/>
+        <mesh filename="meshes/ankle_pitch_left.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -411,27 +411,27 @@
       <origin xyz="5.2852977297875645e-11 0.03886000044248171 0.01767796761874614" rpy="0 0 0"/>
     </inertial>
   </link>
-  <joint name="left_knee_pitch" type="revolute">
-    <origin xyz="-0.018825 0 0.02221" rpy="-1.5707963 0 -1.5707963"/>
+  <joint name="right_knee_pitch" type="revolute">
+    <origin xyz="-0.020825 0 0.03271" rpy="-1.5707963 0 -1.5707963"/>
     <parent link="knee_pitch_right"/>
-    <child link="left_knee_pitch_motor"/>
+    <child link="ankle_pitch_right"/>
     <limit effort="80" velocity="5" lower="-1.5707963" upper="1.5707963"/>
     <axis xyz="0 0 -1"/>
   </joint>
-  <link name="left_knee_pitch_motor">
+  <link name="ankle_pitch_right">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/left_knee_pitch_motor.stl"/>
+        <mesh filename="meshes/ankle_pitch_right.stl"/>
       </geometry>
-      <material name="left_knee_pitch_motor_material">
+      <material name="ankle_pitch_right_material">
         <color rgba="0.4 0.4 0.4 1"/>
       </material>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/left_knee_pitch_motor.stl"/>
+        <mesh filename="meshes/ankle_pitch_right.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -441,8 +441,8 @@
     </inertial>
   </link>
   <joint name="right_ankle_pitch" type="revolute">
-    <origin xyz="0.0 0.07772000162667812 2.0870670330852548e-09" rpy="9.282041357749903e-08 0.0 0.0"/>
-    <parent link="right_knee_pitch_motor"/>
+    <origin xyz="0.0 -0.06 0" rpy="9.282041357749903e-08 0.0 0.0"/>
+    <parent link="ankle_pitch_right"/>
     <child link="foot_right"/>
     <limit effort="80" velocity="5" lower="-1.5707963" upper="1.5707963"/>
     <axis xyz="0 0 1"/>
@@ -470,8 +470,8 @@
     </inertial>
   </link>
   <joint name="left_ankle_pitch" type="revolute">
-    <origin xyz="0.0 -0.07771999985844844 -0.000499991045895997" rpy="9.282041357749903e-08 0.0 0.0"/>
-    <parent link="left_knee_pitch_motor"/>
+    <origin xyz="0.0 0.06 0" rpy="9.282041357749903e-08 0.0 0.0"/>
+    <parent link="ankle_pitch_left"/>
     <child link="foot_left"/>
     <limit effort="80" velocity="5" lower="-1.5707963" upper="1.5707963"/>
     <axis xyz="0 0 1"/>
