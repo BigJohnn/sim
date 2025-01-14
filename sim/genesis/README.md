@@ -21,3 +21,8 @@ cd rsl_rl && git checkout v1.0.2 && pip install -e .
 查看训练结果。
 
 `python zeroth_eval.py`
+
+注意⚠️
+Mac M系列芯片，使用micromamba替换conda使用，例如
+`micromamba activate genesis`
+然后再调用pip/python等命令
