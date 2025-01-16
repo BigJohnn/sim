@@ -32,6 +32,22 @@ To monitor the training process, start TensorBoard:
 tensorboard --logdir logs
 ```
 
+## Model Conversion to ONNX
+
+To convert trained models to ONNX format:
+
+```bash
+python utils/convert_to_onnx.py \
+    --cfg logs/zeroth-walking/cfgs.pkl \
+    --model ../../examples/model_100.pt \
+    --output ../../examples/model_100.onnx
+```
+
+Arguments:
+- `--cfg`: Path to config file (.pkl)
+- `--model`: Path to model file (.pt) 
+- `--output`: Output ONNX file path
+
 ## Evaluation
 
 To view training results:

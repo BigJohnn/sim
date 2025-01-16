@@ -22,6 +22,12 @@ cd rsl_rl && git checkout v1.0.2 && pip install -e .
 
 `python zeroth_eval.py`
 
+模型转换。
+
+`cd genesis`
+
+`python3 utils/convert_to_onnx.py --cfg logs/zeroth-walking/cfgs.pkl --model ../../examples/model_100.pt --output ../../examples/model_100.onnx`
+
 注意⚠️
 Mac M系列芯片，使用micromamba替换conda使用，例如
 `micromamba activate genesis`
