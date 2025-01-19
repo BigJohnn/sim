@@ -11,7 +11,7 @@ import genesis as gs
 def run_sim(env, policy, obs):
     while True:
         actions = policy(obs)
-        obs, _, rews, dones, infos = env.step(actions)
+        obs, _, _, _ = env.step(actions)
 
 def main():
     parser = argparse.ArgumentParser()
@@ -23,6 +23,10 @@ def main():
 
     log_dir = f"logs/{args.exp_name}"
     env_cfg, obs_cfg, reward_cfg, command_cfg, train_cfg = pickle.load(open(f"logs/{args.exp_name}/cfgs.pkl", "rb"))
+    # Add missing class_name fields
+    train_cfg["algorithm"]["class_name"] = "PPO"
+    train_cfg["policy"]["class_name"] = "ActorCritic"
+    print("train_cfg:", train_cfg)  # Add debug print
     reward_cfg["reward_scales"] = {}
 
     env = ZerothEnv(

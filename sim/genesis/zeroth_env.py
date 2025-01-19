@@ -181,10 +181,15 @@ class ZerothEnv:
         self.last_actions[:] = self.actions[:]
         self.last_dof_vel[:] = self.dof_vel[:]
 
-        return self.obs_buf, None, self.rew_buf, self.reset_buf, self.extras
+        return self.obs_buf, self.rew_buf, self.reset_buf, {
+            "observations": {
+                "critic": self.obs_buf
+            },
+            **self.extras
+        }
 
     def get_observations(self):
-        return self.obs_buf
+        return self.obs_buf, {"observations": {"critic": self.obs_buf}}
 
     def get_privileged_observations(self):
         return None

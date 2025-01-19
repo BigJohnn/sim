@@ -4,7 +4,7 @@
 # 安装rsl_rl。
 ```
 git clone https://github.com/leggedrobotics/rsl_rl
-cd rsl_rl && git checkout v1.0.2 && pip install -e .
+cd rsl_rl && git checkout v2.0.1 && pip install -e .
 ```
 
 # 安装tensorboard。

@@ -11,6 +11,9 @@ import genesis as gs
 def get_train_cfg(exp_name, max_iterations):
 
     train_cfg_dict = {
+        "num_steps_per_env": 48,
+        "save_interval": 10,
+        "empirical_normalization": True, #这个功能可以帮助稳定训练过程，特别是在观测值范围变化较大的情况下
         "algorithm": {
             "clip_param": 0.2,
             "desired_kl": 0.01,
@@ -24,42 +27,27 @@ def get_train_cfg(exp_name, max_iterations):
             "schedule": "adaptive",
             "use_clipped_value_loss": True,
             "value_loss_coef": 1.0,
+            "class_name": "PPO",
         },
-        "init_member_classes": {},
         "policy": {
             "activation": "elu",
             "actor_hidden_dims": [512, 256, 128],
             "critic_hidden_dims": [512, 256, 128],
             "init_noise_std": 1.0,
+            "class_name": "ActorCritic",
         },
         "runner": {
             "algorithm_class_name": "PPO",
-            "checkpoint": -1,
             "experiment_name": exp_name,
-            "load_run": -1,
-            "log_interval": 1,
-            "max_iterations": max_iterations,
-            "num_steps_per_env": 48,
-            "policy_class_name": "ActorCritic",
-            "record_interval": -1,
-            "resume": False,
-            "resume_path": None,
-            "run_name": "",
-            "runner_class_name": "OnPolicyRunner",
-            "save_interval": 10,
-        },
-        "runner_class_name": "OnPolicyRunner",
-        "seed": 1,
+            "run_name": "zeroth-walking",
+        }
     }
 
     return train_cfg_dict
 
 
 def get_cfgs():
-    env_cfg = {
-        "num_actions": 12,
-        # joint/link names
-        "default_joint_angles": {  # [rad]
+    default_joint_angles={  # [rad]
             "left_elbow_yaw": 3.14,
             "right_elbow_yaw": 3.14,
             "right_hip_pitch": 0.0,
@@ -72,21 +60,12 @@ def get_cfgs():
             "left_knee_pitch": 0.0,
             "right_ankle_pitch": 0.0,
             "left_ankle_pitch": 0.0,
-        },
-        "dof_names": [
-            "left_elbow_yaw",
-            "right_elbow_yaw",
-            "right_hip_pitch",
-            "left_hip_pitch",
-            "right_hip_yaw",
-            "left_hip_yaw",
-            "right_hip_roll",
-            "left_hip_roll",
-            "right_knee_pitch",
-            "left_knee_pitch",
-            "right_ankle_pitch",
-            "left_ankle_pitch",
-        ],
+        }
+    env_cfg = {
+        "num_actions": 12,
+        # joint/link names
+        "default_joint_angles": default_joint_angles,
+        "dof_names": list(default_joint_angles.keys()),
         # PD
         "kp": 20.0,
         "kd": 0.5,
@@ -128,8 +107,8 @@ def get_cfgs():
         "num_commands": 3,
         # "lin_vel_y_range": [-0.5, -0.5], # move forward slowly
         "lin_vel_y_range": [-0.6, -0.6], # move faster than above!
-        "lin_vel_x_range": [0, 0],
-        "ang_vel_range": [0, 0],
+        "lin_vel_x_range": [-0.01, 0.01],
+        "ang_vel_range": [-0.01, 0.01],
     }
 
     return env_cfg, obs_cfg, reward_cfg, command_cfg
@@ -139,7 +118,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-e", "--exp_name", type=str, default="zeroth-walking")
     parser.add_argument("-B", "--num_envs", type=int, default=4096)
-    parser.add_argument("--max_iterations", type=int, default=100)
+    parser.add_argument("--max_iterations", type=int, default=101)
     args = parser.parse_args()
 
     gs.init(logging_level="warning")
