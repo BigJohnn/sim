@@ -29,9 +29,7 @@ class ExportModel(ActorCritic):
     def forward(self, obs):
         # 使用actor网络生成动作
         actions = self.actor(obs)
-        # 使用critic网络评估状态值
-        values = self.critic(obs)
-        return actions, values
+        return actions
 
 # 根据配置创建模型实例        
 model = ExportModel(

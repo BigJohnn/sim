@@ -1,5 +1,6 @@
 import torch
 import math
+import collections
 import genesis as gs
 from genesis.utils.geom import quat_to_xyz, transform_by_quat, inv_quat, transform_quat_by_quat
 
@@ -14,12 +15,17 @@ class ZerothEnv:
 
         self.num_envs = num_envs
         self.num_obs = obs_cfg["num_obs"]
-        self.num_privileged_obs = None
+        # self.num_privileged_obs = obs_cfg.get("num_privileged_obs", None)
         self.num_actions = env_cfg["num_actions"]
         self.num_commands = command_cfg["num_commands"]
+        
+        # observation history
+        self.frame_stack = obs_cfg.get("frame_stack", 1)
+        self.obs_history = collections.deque(maxlen=self.frame_stack)
+        self.critic_history = collections.deque(maxlen=self.frame_stack)
 
         self.simulate_action_latency = True  # there is a 1 step latency on real robot
-        self.dt = 0.02  # control frequence on real robot is 50hz
+        self.dt = 0.001  # control frequence on real robot is 1000hz
         self.max_episode_length = math.ceil(env_cfg["episode_length_s"] / self.dt)
 
         self.env_cfg = env_cfg
@@ -29,6 +35,9 @@ class ZerothEnv:
 
         self.obs_scales = obs_cfg["obs_scales"]
         self.reward_scales = reward_cfg["reward_scales"]
+        
+        # privileged observation config
+        self.num_privileged_obs = self.num_commands + self.num_actions * 3 + 3 + 3 + 3  # commands + dof_pos + dof_vel + actions + lin_vel + ang_vel + quat
 
         # create scene
         self.scene = gs.Scene(
@@ -58,8 +67,8 @@ class ZerothEnv:
         self.inv_base_init_quat = inv_quat(self.base_init_quat)
         self.robot = self.scene.add_entity(
             gs.morphs.URDF(
-                # file="urdf/go2/urdf/go2.urdf",
-                file="../resources/stompymicro/robot_fixed.urdf",
+                # file="../resources/stompymicro/robot_fixed.urdf",
+                file="sim/resources/stompymicro/robot_fixed.urdf", 
                 pos=self.base_init_pos.cpu().numpy(),
                 quat=self.base_init_quat.cpu().numpy(),
             ),
@@ -89,7 +98,10 @@ class ZerothEnv:
         self.global_gravity = torch.tensor([0.0, 0.0, -1.0], device=self.device, dtype=gs.tc_float).repeat(
             self.num_envs, 1
         )
-        self.obs_buf = torch.zeros((self.num_envs, self.num_obs), device=self.device, dtype=gs.tc_float)
+        # observation buffers
+        self.obs_buf = torch.zeros((self.num_envs, self.num_obs * self.frame_stack), device=self.device, dtype=gs.tc_float)
+        if self.num_privileged_obs is not None:
+            self.privileged_obs_buf = torch.zeros((self.num_envs, self.num_privileged_obs), device=self.device, dtype=gs.tc_float)
         self.rew_buf = torch.zeros((self.num_envs,), device=self.device, dtype=gs.tc_float)
         self.reset_buf = torch.ones((self.num_envs,), device=self.device, dtype=gs.tc_int)
         self.episode_length_buf = torch.zeros((self.num_envs,), device=self.device, dtype=gs.tc_int)
@@ -117,6 +129,7 @@ class ZerothEnv:
         self.commands[envs_idx, 0] = gs_rand_float(*self.command_cfg["lin_vel_x_range"], (len(envs_idx),), self.device)
         self.commands[envs_idx, 1] = gs_rand_float(*self.command_cfg["lin_vel_y_range"], (len(envs_idx),), self.device)
         self.commands[envs_idx, 2] = gs_rand_float(*self.command_cfg["ang_vel_range"], (len(envs_idx),), self.device)
+        self.commands[envs_idx, 3] = gs_rand_float(*self.command_cfg["heading"], (len(envs_idx),), self.device)
 
     def step(self, actions):
         self.actions = torch.clip(actions, -self.env_cfg["clip_actions"], self.env_cfg["clip_actions"])
@@ -166,17 +179,38 @@ class ZerothEnv:
             self.episode_sums[name] += rew
 
         # compute observations
-        self.obs_buf = torch.cat(
+        obs_now = torch.cat(
             [
                 self.base_ang_vel * self.obs_scales["ang_vel"],  # 3
                 self.projected_gravity,  # 3
-                self.commands * self.commands_scale,  # 3
+                self.commands * self.commands_scale,  # 4
                 (self.dof_pos - self.default_dof_pos) * self.obs_scales["dof_pos"],  # 12
                 self.dof_vel * self.obs_scales["dof_vel"],  # 12
                 self.actions,  # 12
             ],
             axis=-1,
         )
+        
+        # privileged observations
+        if self.num_privileged_obs is not None:
+            self.privileged_obs_buf = torch.cat(
+                [
+                    self.commands * self.commands_scale,  # 4
+                    (self.dof_pos - self.default_dof_pos) * self.obs_scales["dof_pos"],  # 12
+                    self.dof_vel * self.obs_scales["dof_vel"],  # 12
+                    self.actions,  # 12
+                    self.base_lin_vel * self.obs_scales["lin_vel"],  # 3
+                    self.base_ang_vel * self.obs_scales["ang_vel"],  # 3
+                    self.base_euler * self.obs_scales["quat"],  # 3
+                ],
+                axis=-1,
+            )
+            self.critic_history.append(self.privileged_obs_buf)
+        
+        # stack observations
+        self.obs_history.append(obs_now)
+        obs_buf_all = torch.stack([self.obs_history[i] for i in range(self.frame_stack)], dim=1)
+        self.obs_buf = obs_buf_all.reshape(self.num_envs, -1)
 
         self.last_actions[:] = self.actions[:]
         self.last_dof_vel[:] = self.dof_vel[:]
@@ -197,6 +231,12 @@ class ZerothEnv:
     def reset_idx(self, envs_idx):
         if len(envs_idx) == 0:
             return
+
+        # reset observation history
+        for i in range(self.frame_stack):
+            self.obs_history[i][envs_idx] *= 0
+            if self.num_privileged_obs is not None:
+                self.critic_history[i][envs_idx] *= 0
 
         # reset dofs
         self.dof_pos[envs_idx] = self.default_dof_pos
@@ -263,7 +303,8 @@ class ZerothEnv:
 
     def _reward_base_height(self):
         # Penalize base height away from target
-        return torch.square(self.base_pos[:, 2] - self.reward_cfg["base_height_target"])
+        height_error = torch.abs(self.base_pos[:, 2] - self.reward_cfg["base_height_target"])
+        return torch.exp(-height_error * self.reward_cfg["reward_scales"]["base_height"])
 
     def _reward_gait_symmetry(self):
         # Reward symmetric gait patterns
@@ -279,4 +320,8 @@ class ZerothEnv:
 
     def _reward_energy_efficiency(self):
         # Reward energy efficiency by penalizing high joint velocities
-        return -torch.sum(torch.square(self.dof_vel), dim=1)
+        return self.reward_cfg["reward_scales"]["dof_vel"] * torch.sum(torch.square(self.dof_vel), dim=1)
+
+    def _reward_orientation(self):
+        # Penalize base orientation away from upright
+        return torch.exp(-torch.abs(self.base_euler[:, 0]) - torch.abs(self.base_euler[:, 1])) * self.reward_cfg["reward_scales"]["orientation"]

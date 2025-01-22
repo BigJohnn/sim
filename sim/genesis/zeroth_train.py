@@ -62,24 +62,24 @@ def get_cfgs():
             "left_ankle_pitch": 0.0,
         }
     env_cfg = {
-        "num_actions": 12,
+        "num_actions": 12,  # 动作的数量
         # joint/link names
-        "default_joint_angles": default_joint_angles,
-        "dof_names": list(default_joint_angles.keys()),
+        "default_joint_angles": default_joint_angles,  # 默认关节角度
+        "dof_names": list(default_joint_angles.keys()),  # 关节名称列表
         # PD
-        "kp": 20.0,
-        "kd": 0.5,
+        "kp": 20.0,  # 比例增益（Proportional gain）
+        "kd": 0.5,  # 微分增益（Derivative gain）
         # termination
-        "termination_if_roll_greater_than": 10,  # degree
-        "termination_if_pitch_greater_than": 10,
+        "termination_if_roll_greater_than": 10,  # 如果滚转角度大于10度则终止
+        "termination_if_pitch_greater_than": 10,  # 如果俯仰角度大于10度则终止
         # base pose
-        "base_init_pos": [0.0, 0.0, 0.42],
-        "base_init_quat": [1.0, 0.0, 0.0, 0.0],
-        "episode_length_s": 20.0,
-        "resampling_time_s": 4.0,
-        "action_scale": 0.25,
-        "simulate_action_latency": True,
-        "clip_actions": 100.0,
+        "base_init_pos": [0.0, 0.0, 0.42],  # 基础初始位置
+        "base_init_quat": [1.0, 0.0, 0.0, 0.0],  # 基础初始四元数（表示旋转）
+        "episode_length_s": 20.0,  # 每个训练回合的时长（秒）
+        "resampling_time_s": 4.0,  # 重新采样时间间隔（秒）
+        "action_scale": 0.25,  # 动作缩放比例
+        "simulate_action_latency": True,  # 是否模拟动作延迟
+        "clip_actions": 100.0,  # 动作裁剪阈值
     }
     obs_cfg = {
         "num_obs": 45,
@@ -91,24 +91,55 @@ def get_cfgs():
         },
     }
     reward_cfg = {
+        "base_height_target": 0.32,  # Robot height
+        "min_dist": 0.03,
+        "max_dist": 0.14,
+        "target_joint_pos_scale": 0.17,  # rad
+        "target_feet_height": 0.02,  # m
+        "cycle_time": 0.4,  # sec
+        "only_positive_rewards": True,
         "tracking_sigma": 0.25,
-        "base_height_target": 0.3,
-        "feet_height_target": 0.075,
+        "max_contact_force": 100,  # forces above this value are penalized
         "reward_scales": {
+            # reference motion tracking
+            "joint_pos": 1.6,
+            "feet_clearance": 1.5,
+            "feet_contact_number": 1.5,
+            "feet_air_time": 1.4,
+            "foot_slip": -0.1,
+            "feet_distance": 0.2,
+            "knee_distance": 0.2,
+            # contact
+            "feet_contact_forces": -0.01,
+            # vel tracking
             "tracking_lin_vel": 1.0,
             "tracking_ang_vel": 0.2,
             "lin_vel_z": -1.0,
-            "base_height": -50.0,
             "action_rate": -0.005,
             "similar_to_default": -0.1,
+            "vel_mismatch_exp": 0.5,  # lin_z; ang x,y
+            "low_speed": 0.4,
+            "track_vel_hard": 0.5,
+            # base pos
+            "default_joint_pos": 1.0,
+            "orientation": 1,
+            "base_height": 0.2,
+            "base_acc": 0.2,
+            # energy
+            "action_smoothness": -0.002,
+            "torques": -1e-5,
+            "dof_vel": -5e-4,
+            "dof_acc": -1e-7,
+            "collision": -1.0,
         },
     }
     command_cfg = {
-        "num_commands": 3,
+        "num_commands": 4,
         # "lin_vel_y_range": [-0.5, -0.5], # move forward slowly
         "lin_vel_y_range": [-0.6, -0.6], # move faster than above!
         "lin_vel_x_range": [-0.01, 0.01],
         "ang_vel_range": [-0.01, 0.01],
+        "heading": [-3.14, 3.14]
     }
 
     return env_cfg, obs_cfg, reward_cfg, command_cfg
