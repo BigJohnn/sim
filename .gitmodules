@@ -1,3 +1,6 @@
 [submodule "third_party/isaacgym"]
 	path = third_party/isaacgym
 	url = ../../kscalelabs/isaacgym.git
+[submodule "sim/genesis/rsl_rl"]
+	path = sim/genesis/rsl_rl
+	url = git@github.com:leggedrobotics/rsl_rl.git

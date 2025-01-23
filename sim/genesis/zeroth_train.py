@@ -11,19 +11,19 @@ import genesis as gs
 def get_train_cfg(exp_name, max_iterations):
 
     train_cfg_dict = {
-        "num_steps_per_env": 48,
+        "num_steps_per_env": 64,  # 增加步数以收集更多样本
         "save_interval": 10,
-        "empirical_normalization": True, #这个功能可以帮助稳定训练过程，特别是在观测值范围变化较大的情况下
+        "empirical_normalization": True,
         "algorithm": {
             "clip_param": 0.2,
             "desired_kl": 0.01,
-            "entropy_coef": 0.01,
+            "entropy_coef": 0.02,  # 增加熵系数以鼓励探索
             "gamma": 0.99,
             "lam": 0.95,
-            "learning_rate": 0.001,
+            "learning_rate": 0.0005,  # 降低学习率以提高稳定性
             "max_grad_norm": 1.0,
             "num_learning_epochs": 5,
-            "num_mini_batches": 4,
+            "num_mini_batches": 8,  # 增加mini-batch数量
             "schedule": "adaptive",
             "use_clipped_value_loss": True,
             "value_loss_coef": 1.0,
@@ -40,6 +40,7 @@ def get_train_cfg(exp_name, max_iterations):
             "algorithm_class_name": "PPO",
             "experiment_name": exp_name,
             "run_name": "zeroth-walking",
+            "device": "mps"  # 明确指定使用MPS设备
         }
     }
 
@@ -48,8 +49,6 @@ def get_train_cfg(exp_name, max_iterations):
 
 def get_cfgs():
     default_joint_angles={  # [rad]
-            "left_elbow_yaw": 3.14,
-            "right_elbow_yaw": 3.14,
             "right_hip_pitch": 0.0,
             "left_hip_pitch": 0.0,
             "right_hip_yaw": 0.0,
@@ -62,7 +61,7 @@ def get_cfgs():
             "left_ankle_pitch": 0.0,
         }
     env_cfg = {
-        "num_actions": 12,  # 动作的数量
+        "num_actions": 10,  # 动作的数量
         # joint/link names
         "default_joint_angles": default_joint_angles,  # 默认关节角度
         "dof_names": list(default_joint_angles.keys()),  # 关节名称列表
@@ -82,55 +81,63 @@ def get_cfgs():
         "clip_actions": 100.0,  # 动作裁剪阈值
     }
     obs_cfg = {
-        "num_obs": 45,
+        "num_obs": 43,
+        "add_noise": True,
+        "noise_level": 0.6,  # scales other values
+
+        "noise_scales": {
+            "dof_pos": 0.05,
+            "dof_vel": 0.5,
+            "ang_vel": 0.1,
+            "lin_vel": 0.05,
+            "quat": 0.03,
+            "height_measurements": 0.1
+        },
         "obs_scales": {
-            "lin_vel": 2.0,
-            "ang_vel": 0.25,
             "dof_pos": 1.0,
             "dof_vel": 0.05,
+            "ang_vel": 1.0,
+            "lin_vel": 2.0,
+            "quat": 1.0,
+            "height_measurements": 5.0
         },
     }
     reward_cfg = {
-        "base_height_target": 0.32,  # Robot height
+        "base_height_target": 0.32,
         "min_dist": 0.03,
         "max_dist": 0.14,
-        "target_joint_pos_scale": 0.17,  # rad
-        "target_feet_height": 0.02,  # m
-        "cycle_time": 0.4,  # sec
+        "target_joint_pos_scale": 0.17,
+        "target_feet_height": 0.02,
+        "cycle_time": 0.4,
         "only_positive_rewards": True,
         "tracking_sigma": 0.25,
-        "max_contact_force": 100,  # forces above this value are penalized
+        "max_contact_force": 100,
         "reward_scales": {
-            # reference motion tracking
+            # 调整奖励权重以匹配zeroth_env.py的实现
             "joint_pos": 1.6,
-            "feet_clearance": 1.5,
-            "feet_contact_number": 1.5,
-            "feet_air_time": 1.4,
-            "foot_slip": -0.1,
-            "feet_distance": 0.2,
-            "knee_distance": 0.2,
-            # contact
-            "feet_contact_forces": -0.01,
-            # vel tracking
-            "tracking_lin_vel": 1.0,
-            "tracking_ang_vel": 0.2,
-            "lin_vel_z": -1.0,
-            "action_rate": -0.005,
-            "similar_to_default": -0.1,
-            "vel_mismatch_exp": 0.5,  # lin_z; ang x,y
-            "low_speed": 0.4,
-            "track_vel_hard": 0.5,
-            # base pos
-            "default_joint_pos": 1.0,
-            "orientation": 1,
-            "base_height": 0.2,
-            "base_acc": 0.2,
-            # energy
-            "action_smoothness": -0.002,
-            "torques": -1e-5,
-            "dof_vel": -5e-4,
-            "dof_acc": -1e-7,
-            "collision": -1.0,
+            # "feet_clearance": 1.5,
+            # "feet_contact_number": 1.5,
+            # "feet_air_time": 1.4,
+            "foot_slip": -0.2,  # 增加滑倒惩罚
+            # "feet_distance": 0.3,
+            # "knee_distance": 0.3,
+            # "feet_contact_forces": -0.02,
+            "tracking_lin_vel": 1.2,  # 增加速度跟踪奖励
+            "tracking_ang_vel": 0.3,
+            "lin_vel_z": -1.5,  # 增加z轴速度惩罚
+            "action_rate": -0.01,
+            "similar_to_default": -0.2,
+            "orientation": 1.5,  # 增加姿态保持奖励
+            "base_height": 0.3,
+            # "base_acc": 0.3,
+            # "action_smoothness": -0.01,  # 增加动作平滑度惩罚
+            # "torques": -2e-5,
+            # "dof_vel": -1e-3,
+            # "collision": -2.0,
+            "terrain_adaptation": 0.1,  # 新增地形适应奖励
+            "gait_symmetry": 1.5,  # 新增步态对称性奖励
+            "energy_efficiency": 0.5,  # 新增能量效率奖励
+            "contact_stability": 0.3  # 新增接触力稳定性奖励
         },
     }
     command_cfg = {

@@ -266,11 +266,11 @@
       <origin xyz="-3.956346057105248e-05 0.0445472299493746 0.0271952803565074" rpy="0 0 0"/>
     </inertial>
   </link>
-  <joint name="right_elbow_yaw" type="revolute">
-    <origin xyz="-0.030003116165437632 -0.06434189265302206 -0.00015000392836930906" rpy="3.141592518707449 -1.961380480253183e-08 2.7052603000000013"/>
+  <joint name="right_elbow_yaw" type="fixed">
+    <origin xyz="-0.030003116165437632 -0.06434189265302206 -0.00015000392836930906" rpy="0 -1.961380480253183e-08 2.7052603000000013"/>
     <parent link="right_shoulder_yaw_motor"/>
     <child link="right_hand"/>
-    <limit effort="2" velocity="10" lower="1.5707963" upper="4.71"/>
+    <limit effort="2" velocity="10" lower="-1.57" upper="1.57"/>
     <axis xyz="0 0 1"/>
   </joint>
   <link name="right_hand">
@@ -295,11 +295,11 @@
       <origin xyz="-3.1209033e-05 -0.045881174 0.018344256" rpy="0 0 0"/>
     </inertial>
   </link>
-  <joint name="left_elbow_yaw" type="revolute">
-    <origin xyz="0.03000311710160605 -0.06434189183411612 -0.00015000134589600138" rpy="3.1415926071795863 -1.7763568394002505e-15 -2.70526039"/>
+  <joint name="left_elbow_yaw" type="fixed">
+    <origin xyz="0.03000311710160605 -0.06434189183411612 -0.00015000134589600138" rpy="0 -1.7763568394002505e-15 -2.70526039"/>
     <parent link="left_shoulder_yaw_motor"/>
     <child link="left_hand"/>
-    <limit effort="2" velocity="10" lower="1.5707963" upper="4.71"/>
+    <limit effort="2" velocity="10" lower="-1.5707963" upper="1.5707963"/>
     <axis xyz="0 0 1"/>
   </joint>
   <link name="left_hand">
