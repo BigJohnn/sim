@@ -40,7 +40,9 @@ def get_train_cfg(exp_name, max_iterations):
             "algorithm_class_name": "PPO",
             "experiment_name": exp_name,
             "run_name": "zeroth-walking",
-            "device": "mps"  # 明确指定使用MPS设备
+            "device": "mps",
+            "checkpoint_interval": 5,  # 每5次迭代保存checkpoint
+            "max_checkpoints": 10  # 最多保留3个最新checkpoint
         }
     }
 
@@ -65,9 +67,24 @@ def get_cfgs():
         # joint/link names
         "default_joint_angles": default_joint_angles,  # 默认关节角度
         "dof_names": list(default_joint_angles.keys()),  # 关节名称列表
+        # friction
+        "env_friction_range": {
+            "start": [0.9, 1.1],
+            "end": [0.9, 1.1],
+        },
+        # link mass
+        # varying this too much collapses the training
+        "link_mass_multipliers": {
+            "start": [1.0, 1.0],
+            "end": [1.0, 1.0],
+        },
+        # RFI
+        "rfi_scale": 0.1,
         # PD
         "kp": 20.0,  # 比例增益（Proportional gain）
         "kd": 0.5,  # 微分增益（Derivative gain）
+        "kp_multipliers": [0.75, 1.25],
+        "kd_multipliers": [0.75, 1.25],
         # termination
         "termination_if_roll_greater_than": 10,  # 如果滚转角度大于10度则终止
         "termination_if_pitch_greater_than": 10,  # 如果俯仰角度大于10度则终止
@@ -81,7 +98,8 @@ def get_cfgs():
         "clip_actions": 100.0,  # 动作裁剪阈值
     }
     obs_cfg = {
-        "num_obs": 43,
+        "num_single_obs": 43,
+        "single_num_privileged_obs": 65,
         "add_noise": True,
         "noise_level": 0.6,  # scales other values
 
@@ -132,7 +150,7 @@ def get_cfgs():
             # "base_acc": 0.3,
             # "action_smoothness": -0.01,  # 增加动作平滑度惩罚
             # "torques": -2e-5,
-            # "dof_vel": -1e-3,
+            "dof_vel": -1e-3,
             # "collision": -2.0,
             "terrain_adaptation": 0.1,  # 新增地形适应奖励
             "gait_symmetry": 1.5,  # 新增步态对称性奖励

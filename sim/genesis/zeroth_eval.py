@@ -22,8 +22,8 @@ def main():
     gs.init()
 
     log_dir = f"logs/{args.exp_name}"
-    # env_cfg, obs_cfg, reward_cfg, command_cfg, train_cfg = pickle.load(open(f"logs/{args.exp_name}/cfgs.pkl", "rb"))
-    env_cfg, obs_cfg, reward_cfg, command_cfg, train_cfg = pickle.load(open(f"sim/genesis/logs/{args.exp_name}/cfgs.pkl", "rb"))
+    env_cfg, obs_cfg, reward_cfg, command_cfg, train_cfg = pickle.load(open(f"logs/{args.exp_name}/cfgs.pkl", "rb"))
+    # env_cfg, obs_cfg, reward_cfg, command_cfg, train_cfg = pickle.load(open(f"sim/genesis/logs/{args.exp_name}/cfgs.pkl", "rb"))
     # Add missing class_name fields
     train_cfg["algorithm"]["class_name"] = "PPO"
     train_cfg["policy"]["class_name"] = "ActorCritic"
@@ -42,7 +42,6 @@ def main():
     # runner = OnPolicyRunner(env, train_cfg, log_dir, device="cuda:0")
     runner = OnPolicyRunner(env, train_cfg, log_dir, device="mps")
     resume_path = os.path.join(log_dir, f"model_{args.ckpt}.pt")
-    # resume_path = os.path.join("examples", f"walking_micro.pt")
     runner.load(resume_path)
     # policy = runner.get_inference_policy(device="cuda:0")
     policy = runner.get_inference_policy(device="mps")

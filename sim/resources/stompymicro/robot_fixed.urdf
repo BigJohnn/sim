@@ -267,7 +267,7 @@
     </inertial>
   </link>
   <joint name="right_elbow_yaw" type="fixed">
-    <origin xyz="-0.030003116165437632 -0.06434189265302206 -0.00015000392836930906" rpy="0 -1.961380480253183e-08 2.7052603000000013"/>
+    <origin xyz="-0.030003116165437632 -0.06434189265302206 -0.03815000134589600138" rpy="0 -1.961380480253183e-08 2.7052603000000013"/>
     <parent link="right_shoulder_yaw_motor"/>
     <child link="right_hand"/>
     <limit effort="2" velocity="10" lower="-1.57" upper="1.57"/>
@@ -296,7 +296,7 @@
     </inertial>
   </link>
   <joint name="left_elbow_yaw" type="fixed">
-    <origin xyz="0.03000311710160605 -0.06434189183411612 -0.00015000134589600138" rpy="0 -1.7763568394002505e-15 -2.70526039"/>
+    <origin xyz="0.03000311710160605 -0.06434189183411612 -0.03815000134589600138" rpy="0 -1.7763568394002505e-15 -2.70526039"/>
     <parent link="left_shoulder_yaw_motor"/>
     <child link="left_hand"/>
     <limit effort="2" velocity="10" lower="-1.5707963" upper="1.5707963"/>
